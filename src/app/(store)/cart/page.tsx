@@ -1,0 +1,133 @@
+'use client'
+
+import { useCartStore } from '@/store/cart'
+import Image from 'next/image'
+import Link from 'next/link'
+import { Button } from '@/components/ui/button'
+import { Trash, Plus, Minus } from '@phosphor-icons/react'
+import CheckoutButton from '@/components/store/checkout-button'
+
+export default function CartPage() {
+  const { items, removeItem, updateQuantity, totalPrice, clearCart } =
+    useCartStore()
+
+  if (items.length === 0) {
+    return (
+      <div className="container mx-auto px-4 py-16 text-center">
+        <h1 className="mb-4 text-2xl font-bold">Your cart is empty</h1>
+        <p className="text-muted-foreground mb-8">
+          Add some products to get started.
+        </p>
+        <Button asChild>
+          <Link href="/products">Browse Products</Link>
+        </Button>
+      </div>
+    )
+  }
+
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="mb-8 text-3xl font-bold">Shopping Cart</h1>
+
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+        {/* Cart Items */}
+        <div className="space-y-4 lg:col-span-2">
+          {items.map((item) => (
+            <div
+              key={item.id}
+              className="bg-card flex gap-4 rounded-lg border p-4"
+            >
+              <div className="bg-muted relative h-24 w-24 shrink-0 overflow-hidden rounded-md">
+                {item.image && (
+                  <Image
+                    src={item.image}
+                    alt={item.name}
+                    fill
+                    sizes="96px"
+                    className="object-cover"
+                  />
+                )}
+              </div>
+
+              <div className="flex-1 space-y-2">
+                <div className="flex justify-between">
+                  <Link
+                    href={`/products/${item.id}`}
+                    className="hover:text-primary font-medium transition-colors"
+                  >
+                    {item.name}
+                  </Link>
+                  <button
+                    onClick={() => removeItem(item.id)}
+                    className="text-muted-foreground hover:text-destructive transition-colors"
+                  >
+                    <Trash size={18} />
+                  </button>
+                </div>
+
+                <p className="text-sm font-bold">${item.price.toFixed(2)}</p>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                    className="hover:bg-muted flex h-8 w-8 items-center justify-center rounded border transition-colors"
+                  >
+                    <Minus size={14} />
+                  </button>
+                  <span className="w-8 text-center text-sm font-medium">
+                    {item.quantity}
+                  </span>
+                  <button
+                    onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                    disabled={item.quantity >= item.stock}
+                    className="hover:bg-muted flex h-8 w-8 items-center justify-center rounded border transition-colors disabled:opacity-50"
+                  >
+                    <Plus size={14} />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={clearCart}
+            className="text-destructive hover:text-destructive"
+          >
+            Clear Cart
+          </Button>
+        </div>
+
+        {/* Order Summary */}
+        <div className="lg:col-span-1">
+          <div className="bg-card sticky top-24 space-y-4 rounded-lg border p-6">
+            <h2 className="text-xl font-bold">Order Summary</h2>
+
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Subtotal</span>
+                <span>${totalPrice().toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Shipping</span>
+                <span className="text-green-600">Free</span>
+              </div>
+            </div>
+
+            <div className="flex justify-between border-t pt-4 text-lg font-bold">
+              <span>Total</span>
+              <span>${totalPrice().toFixed(2)}</span>
+            </div>
+
+            <CheckoutButton />
+
+            <Button variant="outline" className="w-full" asChild>
+              <Link href="/products">Continue Shopping</Link>
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
