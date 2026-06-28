@@ -9,6 +9,7 @@ type Props = {
   product: {
     id: string
     name: string
+    slug: string
     price: number
     image: string
     stock: number

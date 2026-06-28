@@ -7,17 +7,22 @@ import {
 } from '@phosphor-icons/react/dist/ssr'
 
 export default async function AdminDashboard() {
-  const [products, orders, users] = await Promise.all([
+  const [products, orders, users, revenue] = await Promise.all([
     db.product.count(),
     db.order.count(),
     db.user.count(),
+    db.order.aggregate({ _sum: { total: true } }),
   ])
 
   const stats = [
     { label: 'Total Products', value: products, icon: Package },
     { label: 'Total Orders', value: orders, icon: ShoppingCart },
     { label: 'Total Users', value: users, icon: Users },
-    { label: 'Revenue', value: '$0.00', icon: CurrencyDollar },
+    {
+      label: 'Revenue',
+      value: `$${Number(revenue._sum.total ?? 0).toFixed(2)}`,
+      icon: CurrencyDollar,
+    },
   ]
 
   return (

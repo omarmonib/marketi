@@ -1,5 +1,4 @@
 import type { NextAuthConfig } from 'next-auth'
-import Credentials from 'next-auth/providers/credentials'
 import Google from 'next-auth/providers/google'
 
 export const authConfig: NextAuthConfig = {
@@ -11,16 +10,6 @@ export const authConfig: NextAuthConfig = {
     Google({
       clientId: process.env.AUTH_GOOGLE_ID!,
       clientSecret: process.env.AUTH_GOOGLE_SECRET!,
-    }),
-    Credentials({
-      name: 'credentials',
-      credentials: {
-        email: { label: 'Email', type: 'email' },
-        password: { label: 'Password', type: 'password' },
-      },
-      async authorize() {
-        return null
-      },
     }),
   ],
   callbacks: {

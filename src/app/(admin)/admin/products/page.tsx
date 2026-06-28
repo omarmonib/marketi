@@ -3,21 +3,37 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Plus } from '@phosphor-icons/react/dist/ssr'
 import AdminProductsTable from '@/components/admin/products-table'
+import Pagination from '@/components/shared/pagination'
+import { Suspense } from 'react'
 
-export default async function AdminProductsPage() {
-  const products = await db.product.findMany({
-    include: { category: true },
-    orderBy: { createdAt: 'desc' },
-  })
+const PER_PAGE = 20
+
+export default async function AdminProductsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>
+}) {
+  const { page } = await searchParams
+  const currentPage = Math.max(1, Number(page ?? 1))
+
+  const [products, total] = await Promise.all([
+    db.product.findMany({
+      include: { category: true },
+      orderBy: { createdAt: 'desc' },
+      skip: (currentPage - 1) * PER_PAGE,
+      take: PER_PAGE,
+    }),
+    db.product.count(),
+  ])
+
+  const totalPages = Math.ceil(total / PER_PAGE)
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Products</h1>
-          <p className="text-muted-foreground mt-1">
-            {products.length} products total
-          </p>
+          <p className="text-muted-foreground mt-1">{total} products total</p>
         </div>
         <Button asChild>
           <Link href="/admin/products/new">
@@ -34,6 +50,12 @@ export default async function AdminProductsPage() {
           comparePrice: p.comparePrice ? Number(p.comparePrice) : null,
         }))}
       />
+
+      {totalPages > 1 && (
+        <Suspense>
+          <Pagination totalPages={totalPages} currentPage={currentPage} />
+        </Suspense>
+      )}
     </div>
   )
 }

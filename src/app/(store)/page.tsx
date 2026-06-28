@@ -1,18 +1,30 @@
 import { db } from '@/lib/db'
+import { auth } from '@/lib/auth'
 import ProductCard from '@/components/store/product-card'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 
 export default async function HomePage() {
-  const featuredProducts = await db.product.findMany({
-    where: { published: true, featured: true },
-    include: { category: true },
-    take: 4,
-  })
+  const session = await auth()
 
-  const categories = await db.category.findMany({
-    take: 5,
-  })
+  const [featuredProducts, categories, wishlistItems] = await Promise.all([
+    db.product.findMany({
+      where: { published: true, featured: true },
+      include: { category: true },
+      take: 4,
+    }),
+    db.category.findMany({
+      take: 5,
+    }),
+    session
+      ? db.wishlist.findMany({
+          where: { userId: session.user.id },
+          select: { productId: true },
+        })
+      : Promise.resolve([]),
+  ])
+
+  const savedProductIds = new Set(wishlistItems.map((w) => w.productId))
 
   return (
     <div className="space-y-16">
@@ -75,6 +87,8 @@ export default async function HomePage() {
                   ? Number(product.comparePrice)
                   : null,
               }}
+              isLoggedIn={!!session}
+              isSaved={savedProductIds.has(product.id)}
             />
           ))}
         </div>

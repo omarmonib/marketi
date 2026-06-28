@@ -1,9 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import {
-  UserCircle,
-} from '@phosphor-icons/react'
+import { UserCircle, Heart } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { signOut, useSession } from 'next-auth/react'
 import {
@@ -41,11 +39,27 @@ export default function Navbar() {
           >
             Categories
           </Link>
+          {session && (
+            <Link
+              href="/wishlist"
+              className="hover:text-primary transition-colors"
+            >
+              Wishlist
+            </Link>
+          )}
         </nav>
 
         {/* Actions */}
         <div className="flex items-center gap-2">
           <SearchBar />
+
+          {session && (
+            <Button variant="ghost" size="icon" asChild>
+              <Link href="/wishlist">
+                <Heart size={20} />
+              </Link>
+            </Button>
+          )}
 
           <CartBadge />
 
@@ -62,6 +76,9 @@ export default function Navbar() {
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link href="/orders">My Orders</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/wishlist">My Wishlist</Link>
                 </DropdownMenuItem>
                 {session.user.role === 'ADMIN' && (
                   <>

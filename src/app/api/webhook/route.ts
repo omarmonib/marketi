@@ -59,42 +59,48 @@ export async function POST(req: NextRequest) {
         })
       }
 
-      const orderItems = await Promise.all(
-        lineItems.data.map(async (item) => {
-          const productName =
-            typeof item.price?.product === 'object' &&
-            'name' in item.price.product
-              ? (item.price.product as Stripe.Product).name
-              : ''
+      const orderItems = lineItems.data.map((item) => {
+        const stripeProduct =
+          typeof item.price?.product === 'object'
+            ? (item.price.product as Stripe.Product)
+            : null
 
-          const product = await db.product.findFirst({
-            where: { name: productName },
-          })
+        const productId = stripeProduct?.metadata?.productId ?? ''
 
-          return {
-            productId: product?.id ?? '',
-            quantity: item.quantity ?? 1,
-            price: (item.amount_total ?? 0) / 100 / (item.quantity ?? 1),
-          }
-        })
-      )
+        return {
+          productId,
+          quantity: item.quantity ?? 1,
+          price: (item.amount_total ?? 0) / 100 / (item.quantity ?? 1),
+        }
+      })
 
       const total = (session.amount_total ?? 0) / 100
 
-      await db.order.create({
-        data: {
-          userId,
-          addressId: address.id,
-          total,
-          subtotal: total,
-          stripePaymentId: session.payment_intent as string,
-          status: 'PROCESSING',
-          paymentStatus: 'PAID',
-          items: {
-            create: orderItems.filter((item) => item.productId),
+
+      const validItems = orderItems.filter((item) => item.productId)
+
+      await db.$transaction([
+        db.order.create({
+          data: {
+            userId,
+            addressId: address.id,
+            total,
+            subtotal: total,
+            stripePaymentId: session.payment_intent as string,
+            status: 'PROCESSING',
+            paymentStatus: 'PAID',
+            items: {
+              create: validItems,
+            },
           },
-        },
-      })
+        }),
+        ...validItems.map((item) =>
+          db.product.update({
+            where: { id: item.productId },
+            data: { stock: { decrement: item.quantity } },
+          })
+        ),
+      ])
 
       console.log(`Order created for user ${userId}`)
     } catch (error) {

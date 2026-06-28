@@ -1,15 +1,27 @@
 'use client'
 
+import { useState } from 'react'
 import { useCartStore } from '@/store/cart'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Trash, Plus, Minus } from '@phosphor-icons/react'
 import CheckoutButton from '@/components/store/checkout-button'
+import CouponInput from '@/components/store/coupon-input'
+
+type CouponResult = {
+  coupon: { id: string; code: string; type: string; value: number }
+  discount: number
+}
 
 export default function CartPage() {
   const { items, removeItem, updateQuantity, totalPrice, clearCart } =
     useCartStore()
+  const [appliedCoupon, setAppliedCoupon] = useState<CouponResult | null>(null)
+
+  const subtotal = totalPrice()
+  const discount = appliedCoupon?.discount ?? 0
+  const total = Math.max(0, subtotal - discount)
 
   if (items.length === 0) {
     return (
@@ -52,7 +64,7 @@ export default function CartPage() {
               <div className="flex-1 space-y-2">
                 <div className="flex justify-between">
                   <Link
-                    href={`/products/${item.id}`}
+                    href={`/products/${item.slug}`}
                     className="hover:text-primary font-medium transition-colors"
                   >
                     {item.name}
@@ -107,8 +119,14 @@ export default function CartPage() {
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Subtotal</span>
-                <span>${totalPrice().toFixed(2)}</span>
+                <span>${subtotal.toFixed(2)}</span>
               </div>
+              {discount > 0 && (
+                <div className="flex justify-between text-green-600">
+                  <span>Discount</span>
+                  <span>-${discount.toFixed(2)}</span>
+                </div>
+              )}
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Shipping</span>
                 <span className="text-green-600">Free</span>
@@ -117,10 +135,21 @@ export default function CartPage() {
 
             <div className="flex justify-between border-t pt-4 text-lg font-bold">
               <span>Total</span>
-              <span>${totalPrice().toFixed(2)}</span>
+              <span>${total.toFixed(2)}</span>
             </div>
 
-            <CheckoutButton />
+            {/* Coupon input */}
+            <CouponInput
+              orderTotal={subtotal}
+              applied={appliedCoupon}
+              onApply={setAppliedCoupon}
+              onRemove={() => setAppliedCoupon(null)}
+            />
+
+            <CheckoutButton
+              couponCode={appliedCoupon?.coupon.code}
+              discountedTotal={total}
+            />
 
             <Button variant="outline" className="w-full" asChild>
               <Link href="/products">Continue Shopping</Link>

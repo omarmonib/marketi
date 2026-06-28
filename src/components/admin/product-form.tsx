@@ -1,5 +1,5 @@
 'use client'
-
+import { z } from 'zod'
 import { useState, useTransition } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -7,6 +7,7 @@ import { ProductSchema, ProductInput } from '@/validators/product'
 import { createProduct, updateProduct } from '@/actions/products'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import ImageUpload from '@/components/admin/image-upload'
 import { Textarea } from '@/components/ui/textarea'
 import {
   Form,
@@ -25,6 +26,9 @@ import {
 } from '@/components/ui/select'
 import { useRouter } from 'next/navigation'
 
+type ProductFormInput = z.input<typeof ProductSchema>
+type ProductFormOutput = z.output<typeof ProductSchema>
+
 type Category = { id: string; name: string }
 type Product = ProductInput & { id: string }
 
@@ -38,16 +42,16 @@ export default function ProductForm({ categories, product }: Props) {
   const [error, setError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
 
-  const form = useForm<ProductInput, unknown, ProductInput>({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    resolver: zodResolver(ProductSchema) as any,
+  const form = useForm<ProductFormInput, unknown, ProductFormOutput>({
+    resolver: zodResolver(ProductSchema),
     defaultValues: product ?? {
       name: '',
       slug: '',
       description: '',
       price: 0,
-      comparePrice: '',
+      comparePrice: undefined,
       stock: 0,
+      lowStock: 10,
       categoryId: '',
       images: [''],
       featured: false,
@@ -62,7 +66,7 @@ export default function ProductForm({ categories, product }: Props) {
       .replace(/[^a-z0-9-]/g, '')
   }
 
-  function onSubmit(values: ProductInput) {
+  function onSubmit(values: ProductFormOutput) {
     setError(null)
     startTransition(async () => {
       const result = product
@@ -105,7 +109,6 @@ export default function ProductForm({ categories, product }: Props) {
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="slug"
@@ -119,7 +122,6 @@ export default function ProductForm({ categories, product }: Props) {
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="description"
@@ -137,7 +139,6 @@ export default function ProductForm({ categories, product }: Props) {
             </FormItem>
           )}
         />
-
         <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
@@ -151,6 +152,7 @@ export default function ProductForm({ categories, product }: Props) {
                     step="0.01"
                     placeholder="99.99"
                     {...field}
+                    value={field.value as number}
                   />
                 </FormControl>
                 <FormMessage />
@@ -170,6 +172,7 @@ export default function ProductForm({ categories, product }: Props) {
                     step="0.01"
                     placeholder="129.99"
                     {...field}
+                    value={(field.value as number) ?? ''}
                   />
                 </FormControl>
                 <FormMessage />
@@ -177,8 +180,7 @@ export default function ProductForm({ categories, product }: Props) {
             )}
           />
         </div>
-
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-3 gap-4">
           <FormField
             control={form.control}
             name="stock"
@@ -186,7 +188,31 @@ export default function ProductForm({ categories, product }: Props) {
               <FormItem>
                 <FormLabel>Stock</FormLabel>
                 <FormControl>
-                  <Input type="number" placeholder="100" {...field} />
+                  <Input
+                    type="number"
+                    placeholder="100"
+                    {...field}
+                    value={field.value as number}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="lowStock"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Low Stock Threshold</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    placeholder="10"
+                    {...field}
+                    value={field.value as number}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -221,25 +247,22 @@ export default function ProductForm({ categories, product }: Props) {
             )}
           />
         </div>
-
         <FormField
           control={form.control}
           name="images"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Image URL</FormLabel>
+              <FormLabel>Product Image</FormLabel>
               <FormControl>
-                <Input
-                  placeholder="https://images.unsplash.com/..."
+                <ImageUpload
                   value={field.value[0] ?? ''}
-                  onChange={(e) => field.onChange([e.target.value])}
+                  onChange={(url) => field.onChange([url])}
                 />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-
         <div className="flex gap-6">
           <FormField
             control={form.control}
@@ -277,9 +300,7 @@ export default function ProductForm({ categories, product }: Props) {
             )}
           />
         </div>
-
         {error && <p className="text-destructive text-sm">{error}</p>}
-
         <div className="flex gap-4">
           <Button type="submit" disabled={isPending}>
             {isPending

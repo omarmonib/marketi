@@ -8,6 +8,29 @@ datasource db {
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
+
+// ─── COUPON ──────────────────────────────────────────────
+
+enum CouponType {
+  PERCENTAGE
+  FIXED
+}
+
+model Coupon {
+  id        String      @id @default(cuid())
+  code      String      @unique
+  type      CouponType  @default(PERCENTAGE)
+  value     Decimal     @db.Decimal(10, 2)
+  minOrder  Decimal?    @db.Decimal(10, 2)
+  maxUses   Int?
+  uses      Int         @default(0)
+  active    Boolean     @default(true)
+  expiresAt DateTime?
+  createdAt DateTime    @default(now())
+
+  @@map("coupons")
+}
+
 // ─── ENUMS ───────────────────────────────────────────────
 
 enum Role {
@@ -44,12 +67,13 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  accounts  Account[]
-  sessions  Session[]
-  orders    Order[]
-  reviews   Review[]
-  addresses Address[]
-  cart      Cart?
+  accounts   Account[]
+  sessions   Session[]
+  orders     Order[]
+  reviews    Review[]
+  addresses  Address[]
+  cart       Cart?
+  wishlists  Wishlist[]  // ← added
 
   @@map("users")
 }
@@ -134,28 +158,29 @@ model Category {
 // ─── PRODUCT ─────────────────────────────────────────────
 
 model Product {
-  id          String   @id @default(cuid())
-  name        String
-  slug        String   @unique
-  description String
-  price       Decimal  @db.Decimal(10, 2)
+  id           String   @id @default(cuid())
+  name         String
+  slug         String   @unique
+  description  String
+  price        Decimal  @db.Decimal(10, 2)
   comparePrice Decimal? @db.Decimal(10, 2)
-  cost        Decimal? @db.Decimal(10, 2)
-  sku         String?  @unique
-  stock       Int      @default(0)
-  lowStock    Int      @default(5)
-  images      String[]
-  featured    Boolean  @default(false)
-  published   Boolean  @default(true)
-  categoryId  String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  cost         Decimal? @db.Decimal(10, 2)
+  sku          String?  @unique
+  stock        Int      @default(0)
+  lowStock     Int      @default(10)
+  images       String[]
+  featured     Boolean  @default(false)
+  published    Boolean  @default(true)
+  categoryId   String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   category   Category    @relation(fields: [categoryId], references: [id])
   reviews    Review[]
   orderItems OrderItem[]
   cartItems  CartItem[]
   tags       Tag[]
+  wishlists  Wishlist[]  // ← added
 
   @@map("products")
 }
@@ -168,6 +193,21 @@ model Tag {
   @@map("tags")
 }
 
+// ─── WISHLIST ────────────────────────────────────────────
+
+model Wishlist {
+  id        String   @id @default(cuid())
+  userId    String
+  productId String
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@map("wishlists")
+}
+
 // ─── REVIEW ──────────────────────────────────────────────
 
 model Review {
@@ -175,8 +215,8 @@ model Review {
   userId    String
   productId String
   rating    Int
-  title     String?
-  body      String?
+  title     String
+  body      String
   createdAt DateTime @default(now())
 
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -189,10 +229,10 @@ model Review {
 // ─── CART ────────────────────────────────────────────────
 
 model Cart {
-  id        String     @id @default(cuid())
-  userId    String     @unique
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   user  User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   items CartItem[]
@@ -230,9 +270,9 @@ model Order {
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
 
-  user      User        @relation(fields: [userId], references: [id])
-  address   Address     @relation(fields: [addressId], references: [id])
-  items     OrderItem[]
+  user    User        @relation(fields: [userId], references: [id])
+  address Address     @relation(fields: [addressId], references: [id])
+  items   OrderItem[]
 
   @@map("orders")
 }

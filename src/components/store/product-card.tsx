@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { ShoppingCartSimple } from '@phosphor-icons/react'
 import { useCartStore } from '@/store/cart'
+import WishlistButton from '@/components/store/wishlist-button'
 
 type Product = {
   id: string
@@ -19,13 +20,24 @@ type Product = {
   category: { name: string }
 }
 
-export default function ProductCard({ product }: { product: Product }) {
+type Props = {
+  product: Product
+  isLoggedIn?: boolean
+  isSaved?: boolean
+}
+
+export default function ProductCard({
+  product,
+  isLoggedIn = false,
+  isSaved = false,
+}: Props) {
   const addItem = useCartStore((state) => state.addItem)
 
   function handleAddToCart() {
     addItem({
       id: product.id,
       name: product.name,
+      slug: product.slug,
       price: product.price,
       image: product.images[0] ?? '',
       quantity: 1,
@@ -78,15 +90,22 @@ export default function ProductCard({ product }: { product: Product }) {
           )}
         </div>
 
-        <Button
-          className="w-full"
-          size="sm"
-          onClick={handleAddToCart}
-          disabled={product.stock === 0}
-        >
-          <ShoppingCartSimple size={16} className="mr-2" />
-          {product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            className="flex-1"
+            size="sm"
+            onClick={handleAddToCart}
+            disabled={product.stock === 0}
+          >
+            <ShoppingCartSimple size={16} className="mr-2" />
+            {product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
+          </Button>
+          <WishlistButton
+            productId={product.id}
+            initialSaved={isSaved}
+            isLoggedIn={isLoggedIn}
+          />
+        </div>
       </div>
     </div>
   )

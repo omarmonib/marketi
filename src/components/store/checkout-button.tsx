@@ -6,7 +6,12 @@ import { useCartStore } from '@/store/cart'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 
-export default function CheckoutButton() {
+type Props = {
+  couponCode?: string
+  discountedTotal?: number
+}
+
+export default function CheckoutButton({ couponCode, discountedTotal }: Props) {
   const [loading, setLoading] = useState(false)
   const { items } = useCartStore()
   const { data: session } = useSession()
@@ -23,7 +28,7 @@ export default function CheckoutButton() {
       const res = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items }),
+        body: JSON.stringify({ items, couponCode, discountedTotal }),
       })
 
       const data = await res.json()

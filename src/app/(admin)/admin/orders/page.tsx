@@ -1,31 +1,38 @@
 import { db } from '@/lib/db'
-import { OrderStatus } from '@prisma/client'
+import Pagination from '@/components/shared/pagination'
+import { Suspense } from 'react'
+import OrderStatusSelect from '@/components/admin/order-status-select'
 
-const statusColors: Record<OrderStatus, string> = {
-  PENDING: 'bg-yellow-100 text-yellow-800 border-yellow-300',
-  PROCESSING: 'bg-blue-100 text-blue-800 border-blue-300',
-  SHIPPED: 'bg-purple-100 text-purple-800 border-purple-300',
-  DELIVERED: 'bg-green-100 text-green-800 border-green-300',
-  CANCELLED: 'bg-red-100 text-red-800 border-red-300',
-  REFUNDED: 'bg-gray-100 text-gray-800 border-gray-300',
-}
+const PER_PAGE = 20
 
-export default async function AdminOrdersPage() {
-  const orders = await db.order.findMany({
-    include: {
-      user: { select: { name: true, email: true } },
-      items: true,
-    },
-    orderBy: { createdAt: 'desc' },
-  })
+export default async function AdminOrdersPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>
+}) {
+  const { page } = await searchParams
+  const currentPage = Math.max(1, Number(page ?? 1))
+
+  const [orders, total] = await Promise.all([
+    db.order.findMany({
+      include: {
+        user: { select: { name: true, email: true } },
+        items: true,
+      },
+      orderBy: { createdAt: 'desc' },
+      skip: (currentPage - 1) * PER_PAGE,
+      take: PER_PAGE,
+    }),
+    db.order.count(),
+  ])
+
+  const totalPages = Math.ceil(total / PER_PAGE)
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold">Orders</h1>
-        <p className="text-muted-foreground mt-1">
-          {orders.length} orders total
-        </p>
+        <p className="text-muted-foreground mt-1">{total} orders total</p>
       </div>
 
       <div className="bg-card overflow-hidden rounded-lg border">
@@ -72,11 +79,10 @@ export default async function AdminOrdersPage() {
                     ${Number(order.total).toFixed(2)}
                   </td>
                   <td className="p-4">
-                    <span
-                      className={`rounded border px-2 py-1 text-xs font-medium ${statusColors[order.status]}`}
-                    >
-                      {order.status}
-                    </span>
+                    <OrderStatusSelect
+                      orderId={order.id}
+                      currentStatus={order.status}
+                    />
                   </td>
                   <td className="text-muted-foreground p-4">
                     {new Date(order.createdAt).toLocaleDateString()}
@@ -87,6 +93,12 @@ export default async function AdminOrdersPage() {
           </tbody>
         </table>
       </div>
+
+      {totalPages > 1 && (
+        <Suspense>
+          <Pagination totalPages={totalPages} currentPage={currentPage} />
+        </Suspense>
+      )}
     </div>
   )
 }

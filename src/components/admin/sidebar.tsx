@@ -8,8 +8,10 @@ import {
   ShoppingCart,
   Users,
   Tag,
+  Ticket,
   SignOut,
 } from '@phosphor-icons/react'
+
 import { signOut } from 'next-auth/react'
 import { cn } from '@/lib/utils'
 
@@ -19,6 +21,7 @@ const links = [
   { href: '/admin/orders', label: 'Orders', icon: ShoppingCart },
   { href: '/admin/users', label: 'Users', icon: Users },
   { href: '/admin/categories', label: 'Categories', icon: Tag },
+  { href: '/admin/coupons', label: 'Coupons', icon: Ticket },
 ]
 
 export default function Sidebar() {
