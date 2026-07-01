@@ -4,6 +4,28 @@ import ProductCard from '@/components/store/product-card'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>
+}) {
+  const { slug } = await params
+  const category = await db.category.findUnique({ where: { slug } })
+  if (!category) return {}
+
+  return {
+    title: `${category.name} Products`,
+    description:
+      category.description ??
+      `Browse all ${category.name} products at Marketi.`,
+    openGraph: {
+      title: `${category.name} — Marketi`,
+      description:
+        category.description ?? `Browse all ${category.name} products.`,
+    },
+  }
+}
+
 export default async function CategoryPage({
   params,
 }: {

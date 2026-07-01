@@ -8,6 +8,38 @@ import WishlistButton from '@/components/store/wishlist-button'
 import ReviewForm from '@/components/store/review-form'
 import ReviewsList from '@/components/store/reviews-list'
 import StarRating from '@/components/shared/star-rating'
+import { Suspense } from 'react'
+import RelatedProducts from '@/components/store/related-products'
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>
+}) {
+  const { slug } = await params
+  const product = await db.product.findUnique({
+    where: { slug, published: true },
+    include: { category: true },
+  })
+
+  if (!product) return {}
+
+  return {
+    title: product.name,
+    description: product.description,
+    openGraph: {
+      title: product.name,
+      description: product.description,
+      images: product.images[0] ? [{ url: product.images[0] }] : [],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: product.name,
+      description: product.description,
+      images: product.images[0] ? [product.images[0]] : [],
+    },
+  }
+}
 
 export default async function ProductPage({
   params,
@@ -175,6 +207,27 @@ export default async function ProductPage({
           )}
         </div>
       </div>
+      {/* Related products */}
+      <Suspense
+        fallback={
+          <div className="mt-16">
+            <h2 className="mb-6 text-2xl font-bold">You Might Also Like</h2>
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              {[...Array(4)].map((_, i) => (
+                <div
+                  key={i}
+                  className="bg-muted aspect-square animate-pulse rounded-lg"
+                />
+              ))}
+            </div>
+          </div>
+        }
+      >
+        <RelatedProducts
+          categoryId={product.categoryId}
+          excludeId={product.id}
+        />
+      </Suspense>
     </div>
   )
 }

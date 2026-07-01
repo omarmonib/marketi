@@ -6,7 +6,7 @@ generator client {
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  //directUrl = env("DIRECT_URL")
 }
 
 // ─── COUPON ──────────────────────────────────────────────
@@ -73,9 +73,27 @@ model User {
   reviews    Review[]
   addresses  Address[]
   cart       Cart?
-  wishlists  Wishlist[]  // ← added
+  wishlists  Wishlist[]
+  media     Media[]
 
   @@map("users")
+}
+// ─── Media ─────────────────────────────────────────
+model Media {
+  id           String   @id @default(cuid())
+  titleAr      String
+  titleEn      String
+  category     String   @default("QURAN")
+  kind         String   @default("AUDIO")
+  url          String
+  thumbnailUrl String?
+  duration     String?
+  description  String?
+  published    Boolean  @default(true)
+  uploadedBy   String
+  uploader     User     @relation(fields: [uploadedBy], references: [id])
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
 
 model Account {
