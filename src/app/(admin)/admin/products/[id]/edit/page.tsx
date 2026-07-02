@@ -32,8 +32,9 @@ export default async function EditProductPage({
           price: Number(product.price),
           comparePrice: product.comparePrice
             ? Number(product.comparePrice)
-            : '',
+            : null,
           stock: product.stock,
+          lowStock: product.lowStock,
           categoryId: product.categoryId,
           images: product.images,
           featured: product.featured,

@@ -30,7 +30,10 @@ type ProductFormInput = z.input<typeof ProductSchema>
 type ProductFormOutput = z.output<typeof ProductSchema>
 
 type Category = { id: string; name: string }
-type Product = ProductInput & { id: string }
+type Product = Omit<ProductInput, 'comparePrice'> & {
+  id: string
+  comparePrice: number | null
+}
 
 type Props = {
   categories: Category[]
