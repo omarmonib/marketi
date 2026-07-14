@@ -23,11 +23,13 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 
 export default function RegisterPage() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
+  const t = useTranslations('auth')
 
   const form = useForm<RegisterInput>({
     resolver: zodResolver(RegisterSchema),
@@ -51,10 +53,8 @@ export default function RegisterPage() {
     <div className="flex min-h-screen items-center justify-center px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Create an account</CardTitle>
-          <CardDescription>
-            Join Marketi and start shopping today
-          </CardDescription>
+          <CardTitle className="text-2xl">{t('registerTitle')}</CardTitle>
+          <CardDescription>{t('registerDesc')}</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -64,7 +64,7 @@ export default function RegisterPage() {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Full Name</FormLabel>
+                    <FormLabel>{t('name')}</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="John Doe"
@@ -81,7 +81,7 @@ export default function RegisterPage() {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel>{t('email')}</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="you@example.com"
@@ -99,7 +99,7 @@ export default function RegisterPage() {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Password</FormLabel>
+                    <FormLabel>{t('password')}</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="••••••••"
@@ -117,7 +117,7 @@ export default function RegisterPage() {
                 name="confirmPassword"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Confirm Password</FormLabel>
+                    <FormLabel>{t('confirmPassword')}</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="••••••••"
@@ -139,15 +139,15 @@ export default function RegisterPage() {
               )}
 
               <Button type="submit" className="w-full" disabled={isPending}>
-                {isPending ? 'Creating account...' : 'Create account'}
+                {isPending ? t('creatingAccount') : t('createAccount')}
               </Button>
             </form>
           </Form>
 
           <p className="text-muted-foreground mt-4 text-center text-sm">
-            Already have an account?{' '}
+            {t('haveAccount')}{' '}
             <Link href="/login" className="hover:text-primary underline">
-              Sign in
+              {t('signIn')}
             </Link>
           </p>
         </CardContent>

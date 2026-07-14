@@ -24,11 +24,13 @@ import {
 } from '@/components/ui/card'
 import Link from 'next/link'
 import { signIn } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
 
 export default function LoginPage() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
+  const t = useTranslations('auth')
 
   const form = useForm<LoginInput>({
     resolver: zodResolver(LoginSchema),
@@ -52,8 +54,8 @@ export default function LoginPage() {
     <div className="flex min-h-screen items-center justify-center px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Welcome back</CardTitle>
-          <CardDescription>Sign in to your Marketi account</CardDescription>
+          <CardTitle className="text-2xl">{t('signInTitle')}</CardTitle>
+          <CardDescription>{t('signInDesc')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <Button
@@ -62,7 +64,7 @@ export default function LoginPage() {
             onClick={() => signIn('google', { callbackUrl: '/' })}
             disabled={isPending}
           >
-            Continue with Google
+            {t('signInWithGoogle')}
           </Button>
 
           <div className="relative">
@@ -71,7 +73,7 @@ export default function LoginPage() {
             </div>
             <div className="relative flex justify-center text-xs uppercase">
               <span className="bg-background text-muted-foreground px-2">
-                Or continue with
+                {t('orContinueWith')}
               </span>
             </div>
           </div>
@@ -83,7 +85,7 @@ export default function LoginPage() {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel>{t('email')}</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="you@example.com"
@@ -101,7 +103,7 @@ export default function LoginPage() {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Password</FormLabel>
+                    <FormLabel>{t('password')}</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="••••••••"
@@ -123,15 +125,15 @@ export default function LoginPage() {
               )}
 
               <Button type="submit" className="w-full" disabled={isPending}>
-                {isPending ? 'Signing in...' : 'Sign in'}
+                {isPending ? t('signingIn') : t('signIn')}
               </Button>
             </form>
           </Form>
 
           <p className="text-muted-foreground text-center text-sm">
-            Don&apos;t have an account?{' '}
+            {t('noAccount')}{' '}
             <Link href="/register" className="hover:text-primary underline">
-              Sign up
+              {t('signUp')}
             </Link>
           </p>
         </CardContent>

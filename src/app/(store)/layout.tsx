@@ -2,12 +2,15 @@ import Navbar from '@/components/shared/navbar'
 import { SessionProvider } from 'next-auth/react'
 import Link from 'next/link'
 import { ShoppingBag } from '@phosphor-icons/react/dist/ssr'
+import { getTranslations } from 'next-intl/server'
 
-export default function StoreLayout({
+export default async function StoreLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const t = await getTranslations('footer')
+
   return (
     <SessionProvider>
       <div className="flex min-h-screen flex-col">
@@ -18,9 +21,9 @@ export default function StoreLayout({
           <div className="container mx-auto px-4 py-8 md:py-12">
             <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
               {/* Brand */}
-              <div className="space-y-4 md:col-span-1">
+              <div className="col-span-2 space-y-4 md:col-span-1">
                 <Link href="/" className="flex items-center gap-2">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-linear-to-br from-blue-600 to-purple-600">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-purple-600">
                     <ShoppingBag
                       size={18}
                       className="text-white"
@@ -30,8 +33,7 @@ export default function StoreLayout({
                   <span className="text-lg font-bold">Marketi</span>
                 </Link>
                 <p className="text-muted-foreground text-sm leading-relaxed">
-                  Discover thousands of products across every category at the
-                  best prices.
+                  {t('tagline')}
                 </p>
                 <div className="flex gap-3">
                   {['𝕏', 'f', 'in', '▶'].map((icon) => (
@@ -48,14 +50,17 @@ export default function StoreLayout({
               {/* Shop */}
               <div className="space-y-4">
                 <h3 className="text-sm font-semibold tracking-wider uppercase">
-                  Shop
+                  {t('shop')}
                 </h3>
                 <ul className="space-y-2">
                   {[
-                    { href: '/products', label: 'All Products' },
-                    { href: '/categories', label: 'Categories' },
-                    { href: '/products?sort=price_asc', label: 'Best Prices' },
-                    { href: '/products?featured=true', label: 'Featured' },
+                    { href: '/products', label: t('allProducts') },
+                    { href: '/categories', label: t('categories') },
+                    {
+                      href: '/products?sort=price_asc',
+                      label: t('bestPrices'),
+                    },
+                    { href: '/products?featured=true', label: t('featured') },
                   ].map((link) => (
                     <li key={link.href}>
                       <Link
@@ -72,17 +77,17 @@ export default function StoreLayout({
               {/* Account */}
               <div className="space-y-4">
                 <h3 className="text-sm font-semibold tracking-wider uppercase">
-                  Account
+                  {t('account')}
                 </h3>
                 <ul className="space-y-2">
                   {[
-                    { href: '/login', label: 'Sign In' },
-                    { href: '/register', label: 'Create Account' },
-                    { href: '/orders', label: 'My Orders' },
-                    { href: '/wishlist', label: 'Wishlist' },
-                    { href: '/profile', label: 'Profile' },
+                    { href: '/login', label: t('signIn') },
+                    { href: '/register', label: t('createAccount') },
+                    { href: '/orders', label: t('myOrders') },
+                    { href: '/wishlist', label: t('wishlist') },
+                    { href: '/profile', label: t('profile') },
                   ].map((link) => (
-                    <li key={link.href}>
+                    <li key={link.label}>
                       <Link
                         href={link.href}
                         className="text-muted-foreground hover:text-foreground text-sm transition-colors"
@@ -97,19 +102,19 @@ export default function StoreLayout({
               {/* Support */}
               <div className="space-y-4">
                 <h3 className="text-sm font-semibold tracking-wider uppercase">
-                  Support
+                  {t('support')}
                 </h3>
                 <ul className="space-y-2">
                   {[
-                    { href: '#', label: 'Help Center' },
-                    { href: '#', label: 'Shipping Policy' },
-                    { href: '#', label: 'Returns & Refunds' },
-                    { href: '#', label: 'Privacy Policy' },
-                    { href: '#', label: 'Terms of Service' },
+                    { label: t('helpCenter') },
+                    { label: t('shippingPolicy') },
+                    { label: t('returns') },
+                    { label: t('privacy') },
+                    { label: t('terms') },
                   ].map((link) => (
                     <li key={link.label}>
                       <Link
-                        href={link.href}
+                        href="#"
                         className="text-muted-foreground hover:text-foreground text-sm transition-colors"
                       >
                         {link.label}
@@ -123,7 +128,7 @@ export default function StoreLayout({
             {/* Bottom bar */}
             <div className="mt-8 flex flex-col items-center justify-between gap-4 border-t pt-6 md:flex-row">
               <p className="text-muted-foreground text-xs">
-                © {new Date().getFullYear()} Marketi. All rights reserved.
+                {t('rights', { year: new Date().getFullYear() })}
               </p>
               <div className="flex items-center gap-4">
                 {['Visa', 'Mastercard', 'PayPal', 'Stripe'].map((method) => (

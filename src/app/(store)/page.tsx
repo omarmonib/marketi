@@ -1,11 +1,13 @@
 import { db } from '@/lib/db'
 import { auth } from '@/lib/auth'
+import { getTranslations } from 'next-intl/server'
 import ProductCard from '@/components/store/product-card'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 
 export default async function HomePage() {
   const session = await auth()
+  const t = await getTranslations('home')
 
   const [featuredProducts, categories, wishlistItems] = await Promise.all([
     db.product.findMany({
@@ -30,10 +32,7 @@ export default async function HomePage() {
     <div className="space-y-16">
       {/* Hero */}
       <section className="relative overflow-hidden border-b">
-        {/* Gradient background */}
         <div className="absolute inset-0 bg-linear-to-br from-slate-900 via-slate-800 to-slate-900" />
-
-        {/* Subtle grid texture */}
         <div
           className="absolute inset-0 opacity-[0.03]"
           style={{
@@ -41,25 +40,21 @@ export default async function HomePage() {
             backgroundSize: '40px 40px',
           }}
         />
-
-        {/* Glow effects */}
         <div className="absolute -top-40 -left-40 h-80 w-80 rounded-full bg-blue-500/20 blur-[100px]" />
         <div className="absolute -right-40 -bottom-40 h-80 w-80 rounded-full bg-purple-500/20 blur-[100px]" />
 
-        {/* Content */}
         <div className="relative container mx-auto space-y-6 px-4 py-28 text-center">
           <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs text-white/70 backdrop-blur-sm">
-            ✦ Free shipping on orders over $50
+            ✦ {t('announcement')}
           </div>
           <h1 className="text-4xl font-bold tracking-tight text-white md:text-6xl">
-            Shop Everything
+            {t('heroTitle')}
             <span className="mt-2 block bg-linear-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-              at Marketi
+              {t('heroSubtitle')}
             </span>
           </h1>
           <p className="mx-auto max-w-xl text-lg text-white/60">
-            Discover thousands of products across every category — electronics,
-            fashion, home, books, and more.
+            {t('heroDescription')}
           </p>
           <div className="flex justify-center gap-4">
             <Button
@@ -67,7 +62,7 @@ export default async function HomePage() {
               asChild
               className="bg-white text-slate-900 hover:bg-white/90"
             >
-              <Link href="/products">Shop Now</Link>
+              <Link href="/products">{t('shopNow')}</Link>
             </Button>
             <Button
               size="lg"
@@ -75,7 +70,7 @@ export default async function HomePage() {
               asChild
               className="border-white/20 bg-white/5 text-white backdrop-blur-sm hover:bg-white/10"
             >
-              <Link href="/categories">Browse Categories</Link>
+              <Link href="/categories">{t('browseCategories')}</Link>
             </Button>
           </div>
         </div>
@@ -88,23 +83,23 @@ export default async function HomePage() {
             {[
               {
                 icon: '🚚',
-                title: 'Free Shipping',
-                desc: 'On orders over $50',
+                title: t('trustShipping'),
+                desc: t('trustShippingDesc'),
               },
               {
                 icon: '🔒',
-                title: 'Secure Payments',
-                desc: '100% protected by Stripe',
+                title: t('trustPayments'),
+                desc: t('trustPaymentsDesc'),
               },
               {
                 icon: '↩️',
-                title: 'Easy Returns',
-                desc: '30-day return policy',
+                title: t('trustReturns'),
+                desc: t('trustReturnsDesc'),
               },
               {
                 icon: '💬',
-                title: '24/7 Support',
-                desc: "We're always here to help",
+                title: t('trustSupport'),
+                desc: t('trustSupportDesc'),
               },
             ].map((item) => (
               <div key={item.title} className="flex items-center gap-4">
@@ -121,8 +116,8 @@ export default async function HomePage() {
 
       {/* Categories */}
       <section className="container mx-auto px-4">
-        <h2 className="mb-6 text-2xl font-bold">Shop by Category</h2>
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-5">
+        <h2 className="mb-6 text-2xl font-bold">{t('shopByCategory')}</h2>
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-5">
           {categories.map((category, i) => {
             const gradients = [
               'from-blue-500/10 to-blue-600/20 hover:from-blue-500/20 hover:to-blue-600/30 border-blue-500/20',
@@ -156,9 +151,9 @@ export default async function HomePage() {
       {/* Featured Products */}
       <section className="container mx-auto px-4 pb-16">
         <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-2xl font-bold">Featured Products</h2>
+          <h2 className="text-2xl font-bold">{t('featuredProducts')}</h2>
           <Button variant="outline" asChild>
-            <Link href="/products">View All</Link>
+            <Link href="/products">{t('viewAll')}</Link>
           </Button>
         </div>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">

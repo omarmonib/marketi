@@ -14,24 +14,27 @@ import {
 } from '@/components/ui/dropdown-menu'
 import CartBadge from '@/components/shared/cart-badge'
 import SearchBar from '@/components/shared/search-bar'
+import LanguageSwitcher from '@/components/shared/language-switcher'
 import Image from 'next/image'
-
-const navLinks = [
-  { href: '/products', label: 'Products' },
-  { href: '/categories', label: 'Categories' },
-  { href: '/wishlist', label: 'Wishlist' },
-]
+import { useTranslations } from 'next-intl'
 
 export default function Navbar() {
   const { data: session } = useSession()
   const [mobileOpen, setMobileOpen] = useState(false)
+  const t = useTranslations('nav')
+
+  const navLinks = [
+    { href: '/products', label: t('products') },
+    { href: '/categories', label: t('categories') },
+    { href: '/wishlist', label: t('wishlist') },
+  ]
 
   return (
     <header className="dark:bg-background/80 sticky top-0 z-50 w-full border-b bg-white/80 backdrop-blur-md">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-linear-to-br from-blue-600 to-purple-600">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-purple-600">
             <ShoppingBag size={18} className="text-white" weight="fill" />
           </div>
           <span className="text-lg font-bold tracking-tight">Marketi</span>
@@ -52,6 +55,8 @@ export default function Navbar() {
 
         {/* Actions */}
         <div className="flex items-center gap-1">
+          <LanguageSwitcher />
+
           <SearchBar />
 
           {session && (
@@ -82,7 +87,7 @@ export default function Navbar() {
                       className="rounded-full object-cover"
                     />
                   ) : (
-                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-linear-to-br from-blue-600 to-purple-600 text-xs font-bold text-white">
+                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-purple-600 text-xs font-bold text-white">
                       {session.user.name?.[0]?.toUpperCase() ?? 'U'}
                     </div>
                   )}
@@ -96,19 +101,19 @@ export default function Navbar() {
                   </p>
                 </div>
                 <DropdownMenuItem asChild>
-                  <Link href="/profile">Profile</Link>
+                  <Link href="/profile">{t('profile')}</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link href="/orders">My Orders</Link>
+                  <Link href="/orders">{t('orders')}</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link href="/wishlist">My Wishlist</Link>
+                  <Link href="/wishlist">{t('myWishlist')}</Link>
                 </DropdownMenuItem>
                 {session.user.role === 'ADMIN' && (
                   <>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
-                      <Link href="/admin">Admin Dashboard</Link>
+                      <Link href="/admin">{t('adminDashboard')}</Link>
                     </DropdownMenuItem>
                   </>
                 )}
@@ -117,21 +122,21 @@ export default function Navbar() {
                   onClick={() => signOut({ callbackUrl: '/login' })}
                   className="text-destructive"
                 >
-                  Sign out
+                  {t('signOut')}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
             <div className="hidden items-center gap-2 md:flex">
               <Button variant="ghost" size="sm" asChild>
-                <Link href="/login">Sign in</Link>
+                <Link href="/login">{t('signIn')}</Link>
               </Button>
               <Button
                 size="sm"
                 asChild
-                className="bg-linear-to-r from-blue-600 to-purple-600 text-white hover:opacity-90"
+                className="bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:opacity-90"
               >
-                <Link href="/register">Sign up</Link>
+                <Link href="/register">{t('signUp')}</Link>
               </Button>
             </div>
           )}
@@ -166,16 +171,16 @@ export default function Navbar() {
               <div className="flex gap-2 pt-2">
                 <Button variant="outline" size="sm" className="flex-1" asChild>
                   <Link href="/login" onClick={() => setMobileOpen(false)}>
-                    Sign in
+                    {t('signIn')}
                   </Link>
                 </Button>
                 <Button
                   size="sm"
-                  className="flex-1 bg-linear-to-r from-blue-600 to-purple-600 text-white hover:opacity-90"
+                  className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:opacity-90"
                   asChild
                 >
                   <Link href="/register" onClick={() => setMobileOpen(false)}>
-                    Sign up
+                    {t('signUp')}
                   </Link>
                 </Button>
               </div>

@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Trash, Plus, Minus } from '@phosphor-icons/react'
 import CheckoutButton from '@/components/store/checkout-button'
 import CouponInput from '@/components/store/coupon-input'
+import { useTranslations } from 'next-intl'
 
 type CouponResult = {
   coupon: { id: string; code: string; type: string; value: number }
@@ -18,6 +19,7 @@ export default function CartPage() {
   const { items, removeItem, updateQuantity, totalPrice, clearCart } =
     useCartStore()
   const [appliedCoupon, setAppliedCoupon] = useState<CouponResult | null>(null)
+  const t = useTranslations('cart')
 
   const subtotal = totalPrice()
   const discount = appliedCoupon?.discount ?? 0
@@ -26,12 +28,10 @@ export default function CartPage() {
   if (items.length === 0) {
     return (
       <div className="container mx-auto px-4 py-16 text-center">
-        <h1 className="mb-4 text-2xl font-bold">Your cart is empty</h1>
-        <p className="text-muted-foreground mb-8">
-          Add some products to get started.
-        </p>
+        <h1 className="mb-4 text-2xl font-bold">{t('empty')}</h1>
+        <p className="text-muted-foreground mb-8">{t('emptyDesc')}</p>
         <Button asChild>
-          <Link href="/products">Browse Products</Link>
+          <Link href="/products">{t('browseProducts')}</Link>
         </Button>
       </div>
     )
@@ -39,7 +39,7 @@ export default function CartPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="mb-8 text-3xl font-bold">Shopping Cart</h1>
+      <h1 className="mb-8 text-3xl font-bold">{t('title')}</h1>
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
         {/* Cart Items */}
@@ -107,38 +107,37 @@ export default function CartPage() {
             onClick={clearCart}
             className="text-destructive hover:text-destructive"
           >
-            Clear Cart
+            {t('clearCart')}
           </Button>
         </div>
 
         {/* Order Summary */}
         <div className="lg:col-span-1">
           <div className="bg-card sticky top-24 space-y-4 rounded-lg border p-6">
-            <h2 className="text-xl font-bold">Order Summary</h2>
+            <h2 className="text-xl font-bold">{t('orderSummary')}</h2>
 
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Subtotal</span>
+                <span className="text-muted-foreground">{t('subtotal')}</span>
                 <span>${subtotal.toFixed(2)}</span>
               </div>
               {discount > 0 && (
                 <div className="flex justify-between text-green-600">
-                  <span>Discount</span>
+                  <span>{t('discount')}</span>
                   <span>-${discount.toFixed(2)}</span>
                 </div>
               )}
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Shipping</span>
-                <span className="text-green-600">Free</span>
+                <span className="text-muted-foreground">{t('shipping')}</span>
+                <span className="text-green-600">{t('free')}</span>
               </div>
             </div>
 
             <div className="flex justify-between border-t pt-4 text-lg font-bold">
-              <span>Total</span>
+              <span>{t('total')}</span>
               <span>${total.toFixed(2)}</span>
             </div>
 
-            {/* Coupon input */}
             <CouponInput
               orderTotal={subtotal}
               applied={appliedCoupon}
@@ -152,7 +151,7 @@ export default function CartPage() {
             />
 
             <Button variant="outline" className="w-full" asChild>
-              <Link href="/products">Continue Shopping</Link>
+              <Link href="/products">{t('continueShopping')}</Link>
             </Button>
           </div>
         </div>
