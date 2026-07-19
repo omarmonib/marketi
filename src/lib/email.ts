@@ -1,8 +1,6 @@
 import { Resend } from 'resend'
 import { OrderConfirmationEmail } from '@/emails/order-confirmation'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
-
 type OrderItem = {
   name: string
   quantity: number
@@ -24,6 +22,9 @@ export async function sendOrderConfirmationEmail({
   total: number
   orderDate: string
 }) {
+  // Initialize inside the function so env var is available at runtime
+  const resend = new Resend(process.env.RESEND_API_KEY)
+
   try {
     await resend.emails.send({
       from: process.env.RESEND_FROM_EMAIL!,
