@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe'
 import { db } from '@/lib/db'
+import { sendOrderConfirmationEmail } from '@/lib/email'
 import Stripe from 'stripe'
 
 export async function POST(req: NextRequest) {
@@ -71,15 +72,14 @@ export async function POST(req: NextRequest) {
           productId,
           quantity: item.quantity ?? 1,
           price: (item.amount_total ?? 0) / 100 / (item.quantity ?? 1),
+          name: stripeProduct?.name ?? 'Product',
         }
       })
 
+      const validItems = orderItems.filter((item) => item.productId)
       const total = (session.amount_total ?? 0) / 100
 
-
-      const validItems = orderItems.filter((item) => item.productId)
-
-      await db.$transaction([
+      const order = await db.$transaction([
         db.order.create({
           data: {
             userId,
@@ -90,7 +90,11 @@ export async function POST(req: NextRequest) {
             status: 'PROCESSING',
             paymentStatus: 'PAID',
             items: {
-              create: validItems,
+              create: validItems.map((item) => ({
+                productId: item.productId,
+                quantity: item.quantity,
+                price: item.price,
+              })),
             },
           },
         }),
@@ -101,6 +105,26 @@ export async function POST(req: NextRequest) {
           })
         ),
       ])
+
+      // Send order confirmation email
+      if (user.email) {
+        await sendOrderConfirmationEmail({
+          to: user.email,
+          customerName: user.name ?? 'Customer',
+          orderId: order[0].id,
+          items: validItems.map((item) => ({
+            name: item.name,
+            quantity: item.quantity,
+            price: item.price,
+          })),
+          total,
+          orderDate: new Date().toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          }),
+        })
+      }
 
       console.log(`Order created for user ${userId}`)
     } catch (error) {
