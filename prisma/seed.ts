@@ -1,29 +1,12 @@
 import { PrismaClient } from '@prisma/client'
-import { PrismaPg } from '@prisma/adapter-pg'
-import { Pool } from 'pg'
-import 'dotenv/config'
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL!,
-  ssl: { rejectUnauthorized: false },
-})
-const adapter = new PrismaPg(pool)
-const db = new PrismaClient({ adapter })
+const db = new PrismaClient()
 
 async function main() {
   console.log('Seeding database...')
 
   // Categories
   const categories = await Promise.all([
-    db.category.upsert({
-      where: { slug: 'electronics' },
-      update: {},
-      create: {
-        name: 'Electronics',
-        slug: 'electronics',
-        description: 'Gadgets and devices',
-      },
-    }),
     db.category.upsert({
       where: { slug: 'clothing' },
       update: {},
@@ -34,12 +17,21 @@ async function main() {
       },
     }),
     db.category.upsert({
+      where: { slug: 'electronics' },
+      update: {},
+      create: {
+        name: 'Electronics',
+        slug: 'electronics',
+        description: 'Gadgets and devices',
+      },
+    }),
+    db.category.upsert({
       where: { slug: 'home-garden' },
       update: {},
       create: {
         name: 'Home & Garden',
         slug: 'home-garden',
-        description: 'Home essentials',
+        description: 'Home and garden products',
       },
     }),
     db.category.upsert({
@@ -57,7 +49,7 @@ async function main() {
       create: {
         name: 'Sports',
         slug: 'sports',
-        description: 'Sports and outdoors',
+        description: 'Sports and fitness',
       },
     }),
   ])
@@ -70,11 +62,11 @@ async function main() {
       name: 'Wireless Noise-Cancelling Headphones',
       slug: 'wireless-noise-cancelling-headphones',
       description:
-        'Premium audio experience with active noise cancellation, 30-hour battery life, and comfortable over-ear design.',
+        'Premium over-ear headphones with active noise cancellation and 30-hour battery life.',
       price: 299.99,
       comparePrice: 399.99,
       stock: 50,
-      categoryId: categories[0].id,
+      categoryId: categories[1].id,
       images: [
         'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800',
       ],
@@ -84,42 +76,15 @@ async function main() {
       name: 'Smartphone Pro Max',
       slug: 'smartphone-pro-max',
       description:
-        'Latest flagship smartphone with 6.7" OLED display, 200MP camera, and 5000mAh battery.',
+        'Latest flagship smartphone with 6.7" OLED display, 5G connectivity, and 108MP camera.',
       price: 1099.99,
       comparePrice: 1299.99,
       stock: 30,
-      categoryId: categories[0].id,
+      categoryId: categories[1].id,
       images: [
-        'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=800',
+        'https://images.unsplash.com/photo-1592899677977-9c10ca588bbd?w=800',
       ],
       featured: true,
-    },
-    {
-      name: 'Classic Cotton T-Shirt',
-      slug: 'classic-cotton-t-shirt',
-      description:
-        'Soft, breathable 100% organic cotton t-shirt. Available in multiple colors.',
-      price: 29.99,
-      stock: 200,
-      categoryId: categories[1].id,
-      images: [
-        'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800',
-      ],
-      featured: false,
-    },
-    {
-      name: 'Slim Fit Denim Jeans',
-      slug: 'slim-fit-denim-jeans',
-      description:
-        'Modern slim fit jeans made from premium stretch denim for all-day comfort.',
-      price: 79.99,
-      comparePrice: 99.99,
-      stock: 120,
-      categoryId: categories[1].id,
-      images: [
-        'https://images.unsplash.com/photo-1542272604-787c3835535d?w=800',
-      ],
-      featured: false,
     },
     {
       name: 'Ceramic Coffee Mug Set',
@@ -192,5 +157,3 @@ async function main() {
 main()
   .catch(console.error)
   .finally(() => db.$disconnect())
-
-  

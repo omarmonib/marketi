@@ -7,7 +7,8 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: 'images.unsplash.com' },
-      { protocol: 'https', hostname: 'res.cloudinary.com' },
+      // Vercel Blob (used in production if BLOB_READ_WRITE_TOKEN is set)
+      { protocol: 'https', hostname: '*.public.blob.vercel-storage.com' },
     ],
   },
 }
