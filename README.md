@@ -8,7 +8,22 @@ A full-featured e-commerce platform built with Next.js 15, TypeScript, PostgreSQ
 
 ## Screenshots
 
-> Home page, product listing, cart, and admin dashboard
+### Home Page
+
+![Marketi Home Page](./screenshots/home1.png)
+
+
+### Products
+
+![Marketi Products](./screenshots/products.png)
+
+### Shopping Cart
+
+![Marketi Cart](./screenshots/cart.png)
+
+### Admin Dashboard
+
+![Marketi Admin Dashboard](./screenshots/admin-dashboard.png)
 
 
 ---
